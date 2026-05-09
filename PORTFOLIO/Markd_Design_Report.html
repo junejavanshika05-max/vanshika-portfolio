@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Markd — Design Process Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F6F3;
+    --surface: #FFFFFF;
+    --text: #1A1A18;
+    --secondary: #6B6B68;
+    --border: #E4E4E0;
+    --violet: #3D1F6E;
+    --violet-hover: #2E1754;
+    --violet-light: #EDE9F7;
+    --violet-mid: #C9BDE8;
+    --success: #2D6A4F;
+    --success-light: #D1FAE5;
+    --pending: #B45309;
+    --pending-light: #FEF3C7;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* TAB NAV */
+  .tab-nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 48px;
+    height: 56px;
+  }
+  .tab-nav-logo {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--violet);
+    letter-spacing: -0.4px;
+  }
+  .tab-nav-links { display: flex; gap: 0; }
+  .tab-link {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--secondary);
+    padding: 0 20px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    text-decoration: none;
+    transition: color 0.15s, border-color 0.15s;
+    white-space: nowrap;
+  }
+  .tab-link:hover { color: var(--text); }
+  .tab-link.active { color: var(--violet); border-bottom-color: var(--violet); }
+  .proto-btn {
+    font-size: 12px;
+    font-weight: 500;
+    color: #fff;
+    background: var(--violet);
+    padding: 8px 16px;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background 0.15s;
+  }
+  .proto-btn:hover { background: var(--violet-hover); }
+
+  /* PAGES */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* COVER */
+  .cover {
+    min-height: 100vh;
+    background: var(--violet);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 64px 64px;
+    pointer-events: none;
+  }
+  .cover-tag {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 24px;
+    position: relative;
+  }
+  .cover-title {
+    font-size: clamp(56px, 10vw, 112px);
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: -3px;
+    line-height: 0.95;
+    margin-bottom: 28px;
+    position: relative;
+  }
+  .cover-subtitle {
+    font-size: 18px;
+    color: rgba(255,255,255,0.48);
+    font-weight: 400;
+    margin-bottom: 72px;
+    position: relative;
+    max-width: 560px;
+    line-height: 1.65;
+  }
+  .cover-meta {
+    display: flex;
+    gap: 0;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 36px;
+    position: relative;
+  }
+  .cover-meta-item {
+    flex: 1;
+    padding-right: 32px;
+    border-right: 1px solid rgba(255,255,255,0.08);
+    margin-right: 32px;
+  }
+  .cover-meta-item:last-child { border-right: none; margin-right: 0; }
+  .cover-meta-label {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.28);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .cover-meta-value { font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.78); }
+
+  /* PROTOTYPE PAGE */
+  .proto-page {
+    background: #0D0D0C;
+    min-height: calc(100vh - 56px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 52px 24px;
+  }
+  .proto-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.22);
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+  .proto-title {
+    font-size: 28px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+  .proto-sub {
+    font-size: 14px;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 36px;
+    text-align: center;
+  }
+  .proto-frame-wrap {
+    width: 100%;
+    max-width: 1100px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.07);
+    box-shadow: 0 40px 100px rgba(0,0,0,0.65);
+  }
+  .proto-frame-wrap iframe {
+    width: 100%;
+    height: 680px;
+    border: none;
+    display: block;
+    background: #1a1a18;
+  }
+  .proto-open-link {
+    margin-top: 20px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.28);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.15s;
+  }
+  .proto-open-link:hover { color: rgba(255,255,255,0.55); }
+
+  /* LAYOUT */
+  .container { max-width: 860px; margin: 0 auto; padding: 0 40px; }
+
+  .section {
+    padding: 96px 0 80px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section:last-child { border-bottom: none; }
+
+  .section-tag {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--violet);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-tag::after { content: ''; flex: 1; height: 1px; background: var(--violet-light); }
+
+  .section-title {
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -1px;
+    line-height: 1.15;
+    margin-bottom: 24px;
+  }
+
+  .section-intro {
+    font-size: 17px;
+    color: var(--secondary);
+    line-height: 1.8;
+    margin-bottom: 52px;
+    max-width: 700px;
+  }
+
+  .subsection { margin-bottom: 60px; }
+  .subsection:last-child { margin-bottom: 0; }
+
+  .subsection-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .subsection-title::before {
+    content: '';
+    width: 3px;
+    height: 15px;
+    background: var(--violet);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* PROSE */
+  .prose p { font-size: 15px; color: var(--secondary); line-height: 1.85; margin-bottom: 20px; }
+  .prose p:last-child { margin-bottom: 0; }
+  .prose strong { color: var(--text); font-weight: 500; }
+
+  /* CARDS */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 32px 0; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px; }
+  .card-label { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--violet); margin-bottom: 12px; }
+  .card-text { font-size: 14px; color: var(--secondary); line-height: 1.7; }
+  .card-text strong { color: var(--text); font-weight: 500; }
+
+  /* TIER CARDS */
+  .tier-cards { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin: 32px 0; }
+  .tier-card { border-radius: 10px; padding: 24px; border: 1px solid var(--border); background: var(--surface); }
+  .tier-card.featured { background: var(--violet); border-color: var(--violet); }
+  .tier-card.pro { border-color: var(--violet); border-width: 1.5px; }
+  .tier-name { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--secondary); margin-bottom: 8px; }
+  .tier-card.featured .tier-name { color: rgba(255,255,255,0.42); }
+  .tier-card.pro .tier-name { color: var(--violet); }
+  .tier-price { font-size: 34px; font-weight: 700; color: var(--text); letter-spacing: -1px; margin-bottom: 2px; }
+  .tier-card.featured .tier-price { color: #fff; }
+  .tier-card.pro .tier-price { color: var(--violet); }
+  .tier-period { font-size: 12px; color: var(--secondary); margin-bottom: 16px; }
+  .tier-card.featured .tier-period { color: rgba(255,255,255,0.38); }
+  .tier-div { height: 1px; background: var(--border); margin-bottom: 16px; }
+  .tier-card.featured .tier-div { background: rgba(255,255,255,0.1); }
+  .tier-feature { font-size: 12px; color: var(--secondary); padding: 5px 0; border-bottom: 1px solid var(--border); line-height: 1.5; }
+  .tier-card.featured .tier-feature { color: rgba(255,255,255,0.7); border-bottom-color: rgba(255,255,255,0.07); }
+  .tier-feature:last-child { border-bottom: none; }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; margin: 32px 0; border-radius: 10px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; background: var(--surface); }
+  thead th { background: var(--violet); color: #fff; font-size: 12px; font-weight: 500; letter-spacing: 0.3px; padding: 14px 18px; text-align: left; }
+  thead th:first-child { border-radius: 9px 0 0 0; }
+  thead th:last-child { border-radius: 0 9px 0 0; }
+  tbody td { padding: 16px 18px; font-size: 13px; color: var(--secondary); border-top: 1px solid var(--border); vertical-align: top; line-height: 1.65; }
+  tbody td:first-child { color: var(--text); font-weight: 500; min-width: 150px; }
+  tbody tr:nth-child(even) td { background: #FAFAF9; }
+
+  /* SWATCH */
+  .swatch { display: inline-block; width: 13px; height: 13px; border-radius: 3px; border: 1px solid rgba(0,0,0,0.08); vertical-align: middle; margin-right: 8px; }
+
+  /* SCREENS */
+  .screen-grid { display: flex; flex-wrap: wrap; gap: 10px; margin: 24px 0; }
+  .screen-pill { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 8px 14px; font-size: 13px; color: var(--text); font-weight: 500; display: flex; align-items: center; gap: 8px; }
+  .screen-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); flex-shrink: 0; }
+
+  /* PROCESS STEPS */
+  .process-step { display: flex; gap: 20px; align-items: flex-start; padding: 24px 0; border-bottom: 1px solid var(--border); }
+  .process-step:last-child { border-bottom: none; }
+  .step-num { width: 32px; height: 32px; border-radius: 50%; background: var(--violet); color: #fff; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .step-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .step-desc { font-size: 14px; color: var(--secondary); line-height: 1.72; }
+
+  /* DNI */
+  .dni-block { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
+  .dni-header { padding: 16px 24px; background: #FAFAF9; border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 600; color: var(--text); }
+  .dni-body { padding: 22px 24px; }
+  .dni-what { font-size: 10px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(--violet); margin-bottom: 8px; }
+  .dni-considered { font-size: 13px; color: var(--secondary); line-height: 1.7; margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
+  .dni-reason { font-size: 14px; color: var(--secondary); line-height: 1.78; }
+  .dni-reason strong { color: var(--text); font-weight: 500; }
+
+  /* ITERATION */
+  .iter-block { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px; margin-bottom: 16px; }
+  .iter-screen { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--violet); margin-bottom: 16px; }
+  .iter-body p { font-size: 14px; color: var(--secondary); line-height: 1.8; margin-bottom: 16px; }
+  .iter-body p:last-child { margin-bottom: 0; }
+  .iter-body strong { color: var(--text); font-weight: 500; }
+
+  /* QUOTE */
+  .quote-block { background: var(--violet); border-radius: 12px; padding: 44px 52px; margin: 52px 0 0; position: relative; overflow: hidden; }
+  .quote-block::before { content: '\201C'; position: absolute; top: -30px; left: 36px; font-size: 200px; color: rgba(255,255,255,0.04); font-family: Georgia, serif; line-height: 1; pointer-events: none; }
+  .quote-text { font-size: 18px; color: rgba(255,255,255,0.88); line-height: 1.75; font-weight: 400; position: relative; font-style: italic; }
+
+  /* FOOTER */
+  .footer { background: var(--violet-hover); padding: 44px 80px; display: flex; align-items: center; justify-content: space-between; }
+  .footer-logo { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: -0.4px; }
+  .footer-text { font-size: 12px; color: rgba(255,255,255,0.28); }
+</style>
+</head>
+<body>
+
+<!-- STICKY NAV -->
+<nav class="tab-nav">
+  <div class="tab-nav-logo">Markd</div>
+  <div class="tab-nav-links"></div>
+  <a class="proto-btn" href="https://www.figma.com/proto/xgZwLUtYTgPJHQL2ier2r8/Markd?node-id=1-3&p=f&viewport=50%2C204%2C0.54&t=ZwCqWCpburzqAYCD-1&scaling=scale-down&content-scaling=fixed&page-id=0%3A1" target="_blank">View in Figma ↗</a>
+</nav>
+
+<!-- REPORT PAGE -->
+<div class="page active" id="page-report">
+
+  <div class="cover">
+    <div class="cover-grid"></div>
+    <div class="cover-tag">Design Process Report · Project 02</div>
+    <div class="cover-title">Markd</div>
+    <div class="cover-subtitle">A portfolio and resume feedback platform connecting design students with real recruiters for structured, paid reviews.</div>
+    <div class="cover-meta">
+      <div class="cover-meta-item"><div class="cover-meta-label">Designer</div><div class="cover-meta-value">Vanshika Juneja</div></div>
+      <div class="cover-meta-item"><div class="cover-meta-label">Platform</div><div class="cover-meta-value">Desktop Web</div></div>
+      <div class="cover-meta-item"><div class="cover-meta-label">Screens</div><div class="cover-meta-value">7 + Prototype</div></div>
+      <div class="cover-meta-item"><div class="cover-meta-label">Tools</div><div class="cover-meta-value">Figma</div></div>
+      <div class="cover-meta-item"><div class="cover-meta-label">Year</div><div class="cover-meta-value">2026</div></div>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- 01 -->
+    <div class="section">
+      <div class="section-tag">01 — Overview</div>
+      <div class="section-title">What is Markd?</div>
+      <div class="section-intro">Markd is a two-sided marketplace for feedback on creative work. Students and job seekers upload their portfolios or resumes, and verified recruiters review them using a structured format — getting paid per review.</div>
+
+      <div class="prose">
+        <p>The idea came from a gap I kept noticing. Platforms like Behance and Dribbble are built for finished, polished work. They reward output, not process. But the reality of being a design student is that most of your time is spent in the middle — where your work is too rough for public platforms but too important to share without expert eyes. Nobody has built a product for that stage. Markd is built for exactly that.</p>
+        <p>What makes it different from just emailing a recruiter is the structure. Every review follows the same five-section format: First impression, Strengths, Areas to improve, Relevance and positioning, and Next steps. Reviewers cite specific pages inline using Harvard citation style — for example (Portfolio, p.3) — and those citations link directly to the relevant page of the uploaded PDF. Students receive something they can actually act on, not just vague encouragement or a list of things they already knew.</p>
+      </div>
+
+      <div class="two-col" style="margin-top:40px;">
+        <div class="card">
+          <div class="card-label">The problem</div>
+          <div class="card-text">Design students iterate in isolation. No structured feedback loop exists for work-in-progress. Existing platforms are built for showcasing finished work, not for getting honest, expert input during the learning process.</div>
+        </div>
+        <div class="card">
+          <div class="card-label">The solution</div>
+          <div class="card-text">A structured feedback marketplace. Students submit work, a verified recruiter reviews it using a guided format with inline citations, and the student receives a report they can act on immediately.</div>
+        </div>
+      </div>
+
+      <div class="subsection" style="margin-top:56px;">
+        <div class="subsection-title">The three-tier model</div>
+        <div class="prose">
+          <p>Markd runs on a subscription model with three tiers. The pricing logic is straightforward: the more you pay, the more senior the reviewer and the more control you have over who reviews your work. Free gets you started. Premium is where most students will spend their time. Pro is for people who are actively job hunting and want senior eyes from specific companies.</p>
+        </div>
+        <div class="tier-cards">
+          <div class="tier-card">
+            <div class="tier-name">Free</div>
+            <div class="tier-price">$0</div>
+            <div class="tier-period">No card required</div>
+            <div class="tier-div"></div>
+            <div class="tier-feature">2 review submissions</div>
+            <div class="tier-feature">Entry-level reviewer assigned</div>
+            <div class="tier-feature">Basic feedback report</div>
+          </div>
+          <div class="tier-card featured">
+            <div class="tier-name">Premium · Most popular</div>
+            <div class="tier-price">$19</div>
+            <div class="tier-period">per month</div>
+            <div class="tier-div"></div>
+            <div class="tier-feature">5 to 7 review submissions</div>
+            <div class="tier-feature">Mid-level recruiter assigned</div>
+            <div class="tier-feature">Detailed five-section report</div>
+            <div class="tier-feature">48 hour turnaround</div>
+          </div>
+          <div class="tier-card pro">
+            <div class="tier-name">Pro</div>
+            <div class="tier-price">$59</div>
+            <div class="tier-period">per month</div>
+            <div class="tier-div"></div>
+            <div class="tier-feature">Unlimited submissions</div>
+            <div class="tier-feature">Senior recruiter at top companies</div>
+            <div class="tier-feature">Detailed five-section report</div>
+            <div class="tier-feature">Choose your reviewer by company</div>
+            <div class="tier-feature">Priority turnaround</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 02 -->
+    <div class="section">
+      <div class="section-tag">02 — Design Process</div>
+      <div class="section-title">How I approached the design</div>
+      <div class="section-intro">Each screen was stress-tested conceptually before I opened Figma. The process was deliberately slow at the start so it could be fast during the build.</div>
+
+      <div class="prose">
+        <p>I used AI as a thinking partner at various points in this project — mainly to pressure-test layout decisions, generate wireframe references for screens I was uncertain about, and flag potential issues before they got embedded in the design. But the actual design work — the visual judgement calls, the iteration decisions, what felt right and what didn't — was done in Figma by hand. AI helped me think faster. It did not do the thinking.</p>
+        <p>The approach for every screen was the same: define the layout logic first, wireframe it to check the structure holds, then build it in Figma. After each screen was built, I reviewed it against the brief and the design system, fixed what was wrong, and moved on. No screen was considered complete after the first pass.</p>
+      </div>
+
+      <div style="margin-top:40px;">
+        <div class="process-step">
+          <div class="step-num">1</div>
+          <div>
+            <div class="step-title">Problem framing</div>
+            <div class="step-desc">Before designing anything, I spent time defining what Markd actually was and what problem it was solving. The two-sided marketplace model meant every student-facing decision had an invisible recruiter-facing consequence, so I needed to understand the full product logic even though the portfolio only shows the student side.</div>
+          </div>
+        </div>
+        <div class="process-step">
+          <div class="step-num">2</div>
+          <div>
+            <div class="step-title">Design system lock</div>
+            <div class="step-desc">I locked the colour palette, typefaces, spacing system, and component language before building any screen. Every subsequent decision had a reference point. When something looked off, I could check it against the system rather than making a new judgement call from scratch. This made iteration faster and kept screens consistent without extra effort.</div>
+          </div>
+        </div>
+        <div class="process-step">
+          <div class="step-num">3</div>
+          <div>
+            <div class="step-title">Screen-by-screen design</div>
+            <div class="step-desc">Each screen started with defining the layout logic and content hierarchy. Once the structure was confirmed, I built the hi-fi version in Figma and reviewed it. Most screens went through two to four rounds of iteration before they were finished. The screens that needed the most work were the ones where I skipped the structure step and built before fully thinking through what the screen needed to do.</div>
+          </div>
+        </div>
+        <div class="process-step">
+          <div class="step-num">4</div>
+          <div>
+            <div class="step-title">Prototype and flow connection</div>
+            <div class="step-desc">Once all screens were complete, I connected them in Figma prototype mode to demonstrate the full student journey from the landing page through to the report screen. The status slide-over required particular attention — the interaction needed to be an overlay rather than a navigation, so the dashboard stayed visible behind the panel. This is the whole point of the slide-over pattern and it took a couple of attempts to get right in Figma.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="subsection" style="margin-top:56px;">
+        <div class="subsection-title">Screens delivered</div>
+        <div class="screen-grid">
+          <div class="screen-pill"><span class="dot"></span>Landing page</div>
+          <div class="screen-pill"><span class="dot"></span>Sign up</div>
+          <div class="screen-pill"><span class="dot"></span>Tier selection</div>
+          <div class="screen-pill"><span class="dot"></span>Dashboard</div>
+          <div class="screen-pill"><span class="dot"></span>New submission</div>
+          <div class="screen-pill"><span class="dot"></span>Report screen</div>
+          <div class="screen-pill"><span class="dot"></span>Status slide-over</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 03 -->
+    <div class="section">
+      <div class="section-tag">03 — Key Decisions</div>
+      <div class="section-title">Design decisions and the reasoning behind them</div>
+      <div class="section-intro">The decisions that shaped Markd were not obvious. Most involved rejecting an easier or more conventional option in favour of something that served the user better, even when it required more thought to justify.</div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th style="width:18%;">Decision</th><th style="width:24%;">What I chose</th><th>Reasoning</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Report screen layout</td>
+              <td>Two-column with sticky anchor nav left and full scrollable report right</td>
+              <td>A three-column layout was the initial idea — anchor nav, report, and portfolio preview side by side. I rejected it because at any realistic desktop width, three columns left each panel too narrow to be usable. The feedback text became cramped and the PDF preview was too small to read. The citation system solved the preview problem more cleanly without the layout cost.</td>
+            </tr>
+            <tr>
+              <td>Citation behaviour</td>
+              <td>Opens PDF in a new browser tab at the correct page via URL page anchor</td>
+              <td>A lightbox overlay was the first idea. It sounds good until you think through the implementation — highlighting a specific line in a browser-rendered PDF requires a custom rendering engine, which is significant infrastructure for a v1 product. Beyond the technical problem, a lightbox adds a third UI layer to an already complex screen. New tab with a page anchor gets the student to the right page instantly, with no additional complexity on either side.</td>
+            </tr>
+            <tr>
+              <td>Resubmit CTA styling</td>
+              <td>Dark violet card at the bottom of the report, in the document flow</td>
+              <td>The button started as a floating element below the last section card, which made it read as a sticky persistent action — a different UI pattern with different user expectations. Floating buttons feel always-available. The Resubmit CTA is a contextual action that only makes sense after reading the report. A card sitting in the document flow at the end of the scroll signals "you've reached the end, here's what to do next" rather than "this button is always available."</td>
+            </tr>
+            <tr>
+              <td>Download Report button</td>
+              <td>Green filled button using the success colour from the design system</td>
+              <td>The button went through three versions. Ghost button first — correct in principle but flagged as too low weight for a primary action on this screen. Then filled violet — which immediately created a hierarchy problem with two competing primary violet buttons. Green resolved it: visually prominent without competing with violet primary actions, and it communicates export or completion rather than navigation.</td>
+            </tr>
+            <tr>
+              <td>Status screen format</td>
+              <td>Slide-over panel overlay triggered from the dashboard card</td>
+              <td>The first instinct was a full dedicated screen. But when I laid out the actual content — three tracker stages, a submission card, a timestamp, and an email notification note — a full screen felt disproportionate. A slide-over keeps the student in context on the dashboard and matches the mental model from delivery apps like Deliveroo, where order tracking appears as an overlay rather than a separate destination.</td>
+            </tr>
+            <tr>
+              <td>Tier selection placement</td>
+              <td>Post sign-up, before the dashboard — not during the submission flow</td>
+              <td>There was a version where tier selection appeared mid-submission, right before the student uploaded their file. The problem is it introduces a disruptive decision at the worst possible moment — when the student has already committed to submitting work. Post sign-up placement means they make the tier decision once, with full context and no pressure, before they start working.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 04 -->
+    <div class="section">
+      <div class="section-tag">04 — Decisions Not Implemented</div>
+      <div class="section-title">What I considered but didn't build</div>
+      <div class="section-intro">Deciding not to build something is a design decision. The options below were seriously considered — they are documented here as evidence that the final design was chosen rather than arrived at by default.</div>
+
+      <div class="dni-block">
+        <div class="dni-header">Portfolio preview as a third column on the report screen</div>
+        <div class="dni-body">
+          <div class="dni-what">What was considered</div>
+          <div class="dni-considered">Displaying the portfolio PDF inline as a third column alongside the anchor navigation and the feedback report, so students could read the reviewer's comments and see the referenced page simultaneously without leaving the screen.</div>
+          <div class="dni-reason">The idea made sense on paper. In practice, three columns at 1440px left each panel too narrow. Feedback text started wrapping at uncomfortable line lengths, the PDF preview was too small to actually read, and the screen felt like it was competing with itself. The layout was solving the wrong problem. The student does not need to see the portfolio and the report at the same time in the same viewport — they need to be able to get to the right page of the portfolio quickly when a citation references it. The clickable citation chips handle that more cleanly than a persistent third column ever could.</div>
+        </div>
+      </div>
+
+      <div class="dni-block">
+        <div class="dni-header">Lightbox overlay for citation links</div>
+        <div class="dni-body">
+          <div class="dni-what">What was considered</div>
+          <div class="dni-considered">When a student clicks a citation chip, the portfolio PDF opens in a lightbox overlay within the report screen, with the referenced page displayed at full size and the specific paragraph or line highlighted.</div>
+          <div class="dni-reason">This was the original idea and I liked it until I thought through the implementation. <strong>Highlighting a specific line within a PDF rendered in a browser is not a simple task.</strong> It requires either baking annotations into the PDF at submission time — which puts a burden on the reviewer's tooling — or building a custom PDF viewer with programmatic overlay support, which is significant frontend infrastructure for a v1 product. Beyond the technical problem, a lightbox adds a third layer of UI to an already complex screen. The new tab with a page anchor is simpler, works everywhere, and gets the student to the right page with one click.</div>
+        </div>
+      </div>
+
+      <div class="dni-block">
+        <div class="dni-header">Recruiter selection screen for Pro tier</div>
+        <div class="dni-body">
+          <div class="dni-what">What was considered</div>
+          <div class="dni-considered">A dedicated screen within the submission flow where Pro tier students browse a directory of senior recruiters, filter by company and specialisation, view review history, and select who they want to review their work.</div>
+          <div class="dni-reason">This screen is planned and exists in the product logic, but the prototype user is on the Premium tier where reviewers are auto-assigned. Building a recruiter directory for a user who would never reach it would have been design effort with no demonstration value in the case study. I am documenting it here so a recruiter reading this knows it was considered and planned, not overlooked. If this portfolio were showing the Pro tier user journey, the recruiter selection screen would be one of the most interesting screens to design.</div>
+        </div>
+      </div>
+
+      <div class="dni-block">
+        <div class="dni-header">Per-section scores on the report screen</div>
+        <div class="dni-body">
+          <div class="dni-what">What was considered</div>
+          <div class="dni-considered">Displaying a small numerical score or coloured indicator within each section card header — for example a score of 7 out of 10 next to "Strengths" — so students could scan the quality of each section without reading the full text.</div>
+          <div class="dni-reason">The reason this was rejected is that the Markd feedback model is guided free-form. Reviewers write open text, not numbers. Introducing per-section scores would require a parallel scoring system that does not exist anywhere in the product logic. More importantly, reducing a nuanced qualitative assessment to a single number risks oversimplifying what the reviewer actually wrote. A "6 out of 10" for Areas to Improve tells you nothing useful. The written feedback does. The overall score bar on the reviewer card is sufficient for at-a-glance assessment, and it covers the full report rather than fragmenting it into section-level scores.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 05 -->
+    <div class="section">
+      <div class="section-tag">05 — Iteration Log</div>
+      <div class="section-title">How each screen evolved</div>
+      <div class="section-intro">No screen was finished on the first build. The iteration log below documents the most significant changes made during the design process and the reasoning behind each one.</div>
+
+      <div class="iter-block">
+        <div class="iter-screen">Dashboard</div>
+        <div class="iter-body">
+          <p>The first version showed the overall score bar on all three card states — Report ready, Under review, and Submitted. This was wrong. A score only means something once the review is complete. Showing a score bar on an Under Review card implies a score exists when it doesn't. The fix was straightforward: score bars appear only on Report ready cards.</p>
+          <p>The empty fourth card initially used generic "Add new" language. This was revised to "Submit another" with the remaining submission count shown below it. The count matters — a Premium student with 4 of 5 submissions used needs to know that before they click, not after. Adding the count made the card useful rather than just functional.</p>
+          <p>A minor but persistent issue was the avatar and username, which were set to JM and James from the initial build and kept reappearing in screenshots after supposedly being corrected. By the time the report screen reviews were happening, the dashboard was showing Vanshika and VJ correctly — but it took several rounds to get there consistently across all frames.</p>
+        </div>
+      </div>
+
+      <div class="iter-block">
+        <div class="iter-screen">Report screen</div>
+        <div class="iter-body">
+          <p>The nav on the initial report screen was a custom one-off layout. "Back to Dashboard" sat inside the nav bar next to the logo, and the centre navigation links were removed. This broke the consistency of the product — every other screen used the same nav component with the same structure. The fix was to copy the dashboard nav across exactly, set "My Reports" as the active link, and place the back navigation in a separate breadcrumb bar below the nav. The breadcrumb is the right place for screen-level navigation; the main nav is for app-level navigation.</p>
+          <p>The anchor nav active state initially used only a background colour fill to indicate the active section. This was revised to lead with a 2px left violet border as the primary indicator, with the background tint as secondary reinforcement. The border is more legible at a glance and is consistent with how active states work in established UI systems.</p>
+          <p>The Download Report button had the most iterations of any element across the whole project. It started as a ghost button, which was the correct instinct but felt too low weight for a primary action. Then it became filled violet — immediately creating a hierarchy problem with two competing primary buttons on the same screen. The final version is filled green using the success colour from the design system. Green communicates export and completion rather than navigation, it stands out without competing, and it is consistent with the success colour language used elsewhere in the product.</p>
+          <p>The Resubmit CTA went through three visual states before landing. It started as a floating centred button, which looked orphaned and read as a sticky action pattern. Then it became a centred button with subtext — better but still disconnected from the section cards above it. The final version is a dark violet card spanning the same width as the section cards, with a heading and submission count on the left and a ghost button on the right. The dark background creates a clear visual full stop at the bottom of the scroll.</p>
+        </div>
+      </div>
+
+      <div class="iter-block">
+        <div class="iter-screen">New submission</div>
+        <div class="iter-body">
+          <p>The "+ New Submission" button in the nav was included in the initial version of this screen. It was removed after noticing the problem: the button is a shortcut to reach the new submission screen, and having it present on the screen it navigates to is redundant at best and slightly disorienting at worst. The nav on this screen was revised to remove it, following the principle that navigation elements should only be present when they serve a function.</p>
+          <p>The optional feedback textarea — "Areas you'd like feedback on" — was initially the same height as the title input, which made it feel like a short text field rather than a space for longer input. This was revised to a proper multiline textarea, which communicates to the student that more detailed input is expected and welcome. A single-line field for an open-ended question sends the wrong signal.</p>
+          <p>The upload zone border was initially plain black dashes. This was revised to the violet-tinted border colour from the design system (#C9BDE8). A black dashed border felt harsh and out of place in a UI that uses warm greys and violet accents everywhere else. The tinted border brings the upload zone into the same visual language as the rest of the product.</p>
+        </div>
+      </div>
+
+      <div class="iter-block">
+        <div class="iter-screen">Status slide-over</div>
+        <div class="iter-body">
+          <p>The status screen started as a full dedicated page with its own nav, breadcrumb, and full-width content. After laying out the actual content — three tracker stages, a submission card, a timestamp, and an email notification note — it became clear the content was too lightweight for a full screen. A full page for three lines of status information would feel like navigating somewhere important only to find a sticky note. The slide-over panel was the right call: same information, better context, appropriate scale.</p>
+          <p>Getting the Figma prototype interaction right took two attempts. The first version was set as "Navigate to," which replaced the dashboard entirely when the student clicked "View Status." This defeated the purpose of the slide-over — the whole point is that the dashboard stays visible and dimmed behind the panel. The fix was changing the action to "Open overlay," resizing the panel frame from 1440px to 380px, and positioning it flush to the right edge of the dashboard frame.</p>
+          <p>The close button on the panel used a red X icon in the first version, which is a familiar dismiss pattern — but red in the Markd design system is the error colour. A red X on a status panel could imply something has gone wrong. The fix was a plain grey circle with a neutral dark X, which signals "close this" without implying an error state.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 06 -->
+    <div class="section">
+      <div class="section-tag">06 — Design System</div>
+      <div class="section-title">The visual language of Markd</div>
+      <div class="section-intro">The design system was defined and locked before any screens were built. This single process decision prevented inconsistency from accumulating across seven screens and made iteration significantly faster throughout the project.</div>
+
+      <div class="subsection">
+        <div class="subsection-title">Colour</div>
+        <div class="prose">
+          <p>The palette is deliberately restrained. A warm off-white background (#F7F6F3) rather than pure white keeps the surface from feeling clinical. Deep violet (#3D1F6E) carries all the brand weight — buttons, active states, links, and interactive elements. Status colours are fully semantic: green for complete, amber for in progress, and red reserved for error states that do not appear in v1 but are defined in the system for consistency.</p>
+        </div>
+        <div class="table-wrap" style="margin-top:24px;">
+          <table>
+            <thead><tr><th>Token</th><th>Hex value</th><th>Where it is used</th></tr></thead>
+            <tbody>
+              <tr><td><span class="swatch" style="background:#F7F6F3;"></span>Background</td><td>#F7F6F3</td><td>Page background across all screens</td></tr>
+              <tr><td><span class="swatch" style="background:#FFFFFF; border:1px solid #ddd;"></span>Card surface</td><td>#FFFFFF</td><td>Cards, panels, nav bar, input fields</td></tr>
+              <tr><td><span class="swatch" style="background:#1A1A18;"></span>Primary text</td><td>#1A1A18</td><td>Headings, body text, labels</td></tr>
+              <tr><td><span class="swatch" style="background:#6B6B68;"></span>Secondary text</td><td>#6B6B68</td><td>Meta information, hints, subtitles, helper copy</td></tr>
+              <tr><td><span class="swatch" style="background:#E4E4E0;"></span>Border</td><td>#E4E4E0</td><td>Card borders, dividers, input field outlines</td></tr>
+              <tr><td><span class="swatch" style="background:#3D1F6E;"></span>Primary accent</td><td>#3D1F6E</td><td>Primary buttons, active states, links, section numbers</td></tr>
+              <tr><td><span class="swatch" style="background:#2E1754;"></span>Accent hover</td><td>#2E1754</td><td>Hover state for violet elements, footer background</td></tr>
+              <tr><td><span class="swatch" style="background:#2D6A4F;"></span>Success</td><td>#2D6A4F</td><td>Report ready state, Download Report button, tracker completion</td></tr>
+              <tr><td><span class="swatch" style="background:#B45309;"></span>Pending</td><td>#B45309</td><td>Under review status, in-progress tracker state</td></tr>
+              <tr><td><span class="swatch" style="background:#991B1B;"></span>Error</td><td>#991B1B</td><td>Error states — defined in the system, reserved for future use</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">Typography</div>
+        <div class="two-col">
+          <div class="card">
+            <div class="card-label">Clash Display</div>
+            <div class="card-text">Used for headings and display text on the landing page and marketing sections. Clash Display carries the brand personality — it is distinctive without being ornamental. In a product built around professional credibility, the typeface needed to feel considered rather than safe.</div>
+          </div>
+          <div class="card">
+            <div class="card-label">Inter</div>
+            <div class="card-text">Used for everything functional — body copy, UI labels, form fields, navigation, section titles within the app. Inter is legible at small sizes and neutral enough not to distract from content. The pairing works because Clash Display handles presence and Inter handles clarity.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">Component principles</div>
+        <div class="prose">
+          <p><strong>Sentence case throughout all UI.</strong> Every label, section title, navigation item, and button uses sentence case. Title case is reserved for marketing headlines on the landing page only. This was a consistent issue during the build — section titles kept reverting to title case across multiple screens and had to be corrected in every review round. It matters because inconsistent casing reads as a mistake rather than a choice.</p>
+          <p><strong>One primary action per screen.</strong> The violet filled button is reserved for the single most important action on any given screen. Secondary actions use ghost styling, grey backgrounds, or green for export actions. When this rule was broken — as it was briefly when Download Report became filled violet — the hierarchy broke immediately and visibly. The fix was always the same: identify which action is primary and demote everything else.</p>
+          <p><strong>Status always uses colour and a label together.</strong> No status is communicated by colour alone. Every status pill includes a coloured dot and a text label, making it accessible and clear regardless of how the screen is being viewed.</p>
+          <p><strong>8pt base grid throughout.</strong> All spacing, padding, and layout decisions follow multiples of 8. This is invisible in the final design but it is what makes the spacing feel systematic rather than arbitrary.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 07 -->
+    <div class="section">
+      <div class="section-tag">07 — Reflections</div>
+      <div class="section-title">What I learned</div>
+      <div class="section-intro">Markd was the most complex project I have designed so far. A two-sided marketplace — even one where the portfolio only shows one side — requires thinking at a product level, not just a screen level.</div>
+
+      <div class="subsection">
+        <div class="subsection-title">What worked well</div>
+        <div class="prose">
+          <p>Locking the design system before building any screens was the single best process decision I made on this project. Every subsequent decision had a reference point. When something looked off, I could check it against the system rather than making a new judgement call. This made iteration faster and kept the screens consistent without extra effort.</p>
+          <p>The decision-first approach to each screen — defining layout logic and content hierarchy before opening Figma — meant I spent significantly less time undoing decisions and more time refining them. The screens that needed the most iteration were the ones where I skipped this step and built before I had fully thought through what the screen needed to do.</p>
+          <p>Using AI as a thinking partner worked well in this project. It was most useful for generating wireframe references quickly, stress-testing layout ideas before committing to them, and flagging inconsistencies I might not have caught until later. Where it was less useful was in the subjective visual judgement calls — those required looking at the actual design in Figma and deciding based on how it felt, which is something you have to do yourself.</p>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">What I would do differently</div>
+        <div class="prose">
+          <p>I would build Figma components from the start. The nav bar appears on every screen and was copy-pasted seven times rather than being a shared component. Any global change to the nav required manually updating seven separate instances. A master component would have made those changes instant. This is the first thing I will do on the next project.</p>
+          <p>I would also establish a more rigorous naming convention for frames and layers early in the file. As the Figma file grew across seven screens, finding specific elements became slower than it needed to be. Layer naming is invisible in the final output but it is the difference between a file that is easy to work in and one that isn't.</p>
+          <p>Finally, I would test the prototype with at least one person who was not involved in making it before considering it complete. The flow connections were logical from my perspective because I designed them. A fresh pair of eyes would have surfaced assumptions I hadn't questioned — particularly around the submission flow and how a first-time user would interpret the tier selection screen.</p>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">What comes next for Markd</div>
+        <div class="prose">
+          <p>The portfolio shows only the student side of a two-sided platform. The recruiter side — the reviewer dashboard, submission queue, guided feedback editor with inline citation tools, and payment flow — is the other half of the product and would be the natural next design project within this brief.</p>
+          <p>On the student side, the Recruiter Selection screen for Pro tier users was scoped but not built. It is one of the most interesting screens in the product because it involves a directory UI, filtering, and a high-stakes selection decision. Who reviews your portfolio for a senior role matters, and the design of that selection experience should reflect that.</p>
+          <p>There is also a mobile question. The current design is desktop-only. The report screen in particular would require a significant rethink for mobile — a two-column layout with sticky navigation does not translate directly to a narrow viewport. That is a design challenge worth taking on as a follow-up.</p>
+        </div>
+      </div>
+
+      <div class="quote-block">
+        <div class="quote-text">Markd is a product I would use myself. That was the test I held it to throughout the design process — not "does this look good?" but "would this actually help someone get a job?" I believe the answer is yes.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <div class="footer-logo">Markd</div>
+    <div class="footer-text">Vanshika Juneja · UI/UX Design Portfolio · 2026</div>
+  </div>
+
+</div>
+
+
+
+</body>
+</html>

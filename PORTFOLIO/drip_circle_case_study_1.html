@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRIP Circle — Service Design Case Study</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0F1F3D;
+    --navy-mid: #1A2E52;
+    --navy-light: #243B6A;
+    --cream: #F5F0E8;
+    --cream-dark: #EDE7D8;
+    --forest: #2D5A3D;
+    --forest-light: #3D7A52;
+    --forest-pale: #E8F0EA;
+    --sand: #C4A882;
+    --text: #1A1A1A;
+    --text-mid: #444444;
+    --text-light: #777777;
+    --border: rgba(15,31,61,0.12);
+    --white: #FFFFFF;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--cream);
+    color: var(--text);
+    font-family: "DM Sans", sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(245,240,232,0.92);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 48px;
+    height: 56px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-logo { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: var(--navy); letter-spacing: -0.3px; }
+  .nav-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--forest); }
+  .nav-links { display: flex; gap: 28px; font-size: 13px; }
+  .nav-links a { color: var(--text-light); text-decoration: none; transition: color 0.15s; }
+  .nav-links a:hover { color: var(--navy); }
+  .nav-badge {
+    font-size: 11px; font-weight: 600; color: var(--white);
+    background: var(--navy); padding: 5px 14px; border-radius: 20px;
+    letter-spacing: 0.5px;
+  }
+
+  /* COVER */
+  .cover {
+    min-height: 100vh;
+    background: var(--navy);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover-left {
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 80px 60px 80px 80px;
+    position: relative; z-index: 2;
+  }
+  .cover-right {
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .cover-circles {
+    position: absolute; inset: 0; overflow: hidden;
+  }
+  .cover-circle {
+    position: absolute; border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .cc1 { width: 600px; height: 600px; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+  .cc2 { width: 420px; height: 420px; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+  .cc3 { width: 240px; height: 240px; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+  .cover-icon {
+    position: relative; z-index: 2;
+    width: 120px; height: 120px;
+    border-radius: 32px;
+    background: linear-gradient(135deg, var(--forest) 0%, #1a3d2a 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 48px;
+  }
+  .cover-eyebrow {
+    font-size: 11px; font-weight: 600; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--forest-light);
+    margin-bottom: 20px;
+  }
+  .cover-title {
+    font-family: "Playfair Display", serif;
+    font-size: clamp(44px, 5.5vw, 72px);
+    font-weight: 700; color: var(--white);
+    letter-spacing: -2px; line-height: 1.0;
+    margin-bottom: 12px;
+  }
+  .cover-title span { color: var(--forest-light); }
+  .cover-subtitle {
+    font-size: 16px; color: rgba(255,255,255,0.5);
+    max-width: 480px; line-height: 1.7; margin-bottom: 60px;
+    font-weight: 300;
+  }
+  .cover-meta {
+    display: flex; gap: 0;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 32px;
+  }
+  .cover-meta-item { flex: 1; padding-right: 24px; border-right: 1px solid rgba(255,255,255,0.1); margin-right: 24px; }
+  .cover-meta-item:last-child { border-right: none; }
+  .cml { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 4px; }
+  .cmv { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.85); }
+  .cover-noise {
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none; opacity: 0.4;
+  }
+
+  /* CONTAINER */
+  .container { max-width: 960px; margin: 0 auto; padding: 0 48px; }
+
+  /* SECTIONS */
+  .section { padding: 96px 0 80px; border-bottom: 1px solid var(--border); scroll-margin-top: 56px; }
+  .section:last-child { border-bottom: none; }
+
+  .section-tag {
+    font-size: 10px; font-weight: 600; letter-spacing: 2.5px;
+    text-transform: uppercase; color: var(--forest);
+    margin-bottom: 16px; display: flex; align-items: center; gap: 12px;
+  }
+  .section-tag::after { content: ''; flex: 1; height: 1px; background: rgba(45,90,61,0.2); }
+
+  .section-title {
+    font-family: "Playfair Display", serif;
+    font-size: clamp(28px, 3.5vw, 44px);
+    font-weight: 700; color: var(--navy);
+    letter-spacing: -1px; line-height: 1.1; margin-bottom: 20px;
+  }
+
+  .section-intro {
+    font-size: 17px; color: var(--text-mid);
+    max-width: 680px; line-height: 1.8; margin-bottom: 52px; font-weight: 300;
+  }
+
+  .prose p { font-size: 15px; color: var(--text-mid); line-height: 1.9; margin-bottom: 20px; font-weight: 300; }
+  .prose p:last-child { margin-bottom: 0; }
+  .prose strong { color: var(--navy); font-weight: 600; }
+
+  /* CARDS */
+  .card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 16px;
+  }
+  .card-label {
+    font-size: 10px; font-weight: 600; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--forest); margin-bottom: 10px;
+  }
+  .card-title { font-size: 15px; font-weight: 600; color: var(--navy); margin-bottom: 8px; }
+  .card-text { font-size: 14px; color: var(--text-mid); line-height: 1.7; font-weight: 300; }
+  .card-text strong { color: var(--navy); font-weight: 600; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 32px 0; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin: 32px 0; }
+
+  /* PROBLEM STATEMENT */
+  .problem-block {
+    background: var(--navy);
+    border-radius: 20px; padding: 40px;
+    margin: 40px 0;
+  }
+  .pb-label { font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--forest-light); margin-bottom: 16px; }
+  .pb-text {
+    font-family: "Playfair Display", serif;
+    font-size: 20px; color: var(--white);
+    line-height: 1.6; font-style: italic;
+  }
+
+  /* PERSONAS */
+  .persona-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 32px 0; }
+  .persona-card {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 16px; padding: 24px; position: relative; overflow: hidden;
+  }
+  .persona-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 3px; background: var(--forest);
+  }
+  .persona-name { font-size: 16px; font-weight: 700; color: var(--navy); margin-bottom: 2px; }
+  .persona-type { font-size: 12px; color: var(--forest); font-weight: 500; margin-bottom: 12px; }
+  .persona-problem {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    color: var(--white); background: var(--navy);
+    padding: 4px 10px; border-radius: 6px; margin-bottom: 12px;
+    letter-spacing: 0.3px;
+  }
+  .persona-quote {
+    font-size: 13px; color: var(--text-mid); line-height: 1.6;
+    font-style: italic; font-weight: 300;
+  }
+
+  /* INSIGHTS */
+  .insight-block {
+    background: var(--cream-dark);
+    border-radius: 12px; padding: 24px;
+    margin-bottom: 12px;
+    border-left: 3px solid var(--forest);
+  }
+  .insight-num { font-size: 11px; font-weight: 700; color: var(--forest); letter-spacing: 1px; margin-bottom: 6px; text-transform: uppercase; }
+  .insight-text { font-size: 14px; color: var(--text); line-height: 1.6; font-weight: 400; }
+
+  /* SCAMPER */
+  .scamper-row {
+    display: grid; grid-template-columns: 80px 1fr;
+    gap: 0; border-bottom: 1px solid var(--border);
+    padding: 20px 0;
+  }
+  .scamper-row:last-child { border-bottom: none; }
+  .scamper-letter {
+    font-family: "Playfair Display", serif;
+    font-size: 32px; font-weight: 700; color: var(--cream-dark);
+    line-height: 1;
+  }
+  .scamper-content {}
+  .scamper-word { font-size: 12px; font-weight: 700; color: var(--forest); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; }
+  .scamper-idea { font-size: 14px; color: var(--text-mid); line-height: 1.65; font-weight: 300; }
+
+  /* DESIGN DECISIONS */
+  .decision-item {
+    display: grid; grid-template-columns: 32px 1fr;
+    gap: 16px; padding: 24px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: start;
+  }
+  .decision-item:last-child { border-bottom: none; }
+  .decision-num {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--navy); color: var(--white);
+    font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 2px;
+  }
+  .decision-title { font-size: 15px; font-weight: 600; color: var(--navy); margin-bottom: 6px; }
+  .decision-text { font-size: 14px; color: var(--text-mid); line-height: 1.7; font-weight: 300; }
+
+  /* SCREENS */
+  .screens-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 12px; margin: 32px 0;
+  }
+  .screen-item {
+    background: var(--navy-mid);
+    border-radius: 12px; padding: 16px 12px;
+    text-align: center;
+  }
+  .screen-icon { font-size: 28px; margin-bottom: 10px; }
+  .screen-name { font-size: 12px; font-weight: 600; color: var(--white); margin-bottom: 4px; }
+  .screen-desc { font-size: 11px; color: rgba(255,255,255,0.45); line-height: 1.4; }
+
+  /* PROTOTYPE CTA */
+  .proto-section {
+    background: var(--navy);
+    border-radius: 24px;
+    padding: 60px;
+    text-align: center;
+    margin: 40px 0;
+    position: relative; overflow: hidden;
+  }
+  .proto-section::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 30% 50%, rgba(45,90,61,0.3) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 50%, rgba(45,90,61,0.15) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .proto-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 2.5px; text-transform: uppercase; color: var(--forest-light); margin-bottom: 16px; }
+  .proto-title {
+    font-family: "Playfair Display", serif;
+    font-size: 36px; font-weight: 700; color: var(--white);
+    margin-bottom: 16px; letter-spacing: -1px; position: relative;
+  }
+  .proto-desc { font-size: 16px; color: rgba(255,255,255,0.5); margin-bottom: 36px; font-weight: 300; position: relative; max-width: 480px; margin-left: auto; margin-right: auto; margin-bottom: 36px; }
+  .proto-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--forest); color: var(--white);
+    font-size: 15px; font-weight: 600;
+    padding: 16px 36px; border-radius: 50px;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s;
+    position: relative;
+  }
+  .proto-btn:hover { background: var(--forest-light); transform: translateY(-1px); }
+  .proto-btn svg { width: 18px; height: 18px; }
+
+  /* QUOTE */
+  .quote-block {
+    border-left: 3px solid var(--forest);
+    padding: 20px 28px; margin: 32px 0;
+    background: var(--white); border-radius: 0 12px 12px 0;
+  }
+  .quote-text {
+    font-family: "Playfair Display", serif;
+    font-size: 18px; color: var(--navy);
+    line-height: 1.6; font-style: italic;
+  }
+  .quote-source { font-size: 12px; color: var(--text-light); margin-top: 8px; font-weight: 500; }
+
+  /* STAT CARDS */
+  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 32px 0; }
+  .stat-card {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 12px; padding: 24px; text-align: center;
+  }
+  .stat-num { font-family: "Playfair Display", serif; font-size: 36px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+  .stat-label { font-size: 12px; color: var(--text-light); font-weight: 400; line-height: 1.4; }
+
+  /* FLOW TABLE */
+  .flow-table { width: 100%; border-collapse: collapse; margin: 32px 0; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+  .flow-table th { background: var(--navy); color: rgba(255,255,255,0.7); font-size: 11px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; padding: 14px 16px; text-align: left; }
+  .flow-table td { padding: 14px 16px; font-size: 13px; color: var(--text-mid); border-top: 1px solid var(--border); vertical-align: top; line-height: 1.6; font-weight: 300; }
+  .flow-table td:first-child { color: var(--navy); font-weight: 600; font-size: 14px; }
+  .flow-table tr:nth-child(even) td { background: rgba(0,0,0,0.015); }
+
+  /* REFLECTION */
+  .reflection-item {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 12px; padding: 24px; margin-bottom: 12px;
+  }
+  .ri-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--forest); margin-bottom: 8px; }
+  .ri-text { font-size: 14px; color: var(--text-mid); line-height: 1.75; font-weight: 300; }
+
+  /* FOOTER */
+  .footer {
+    background: var(--navy); padding: 48px 80px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .footer-left { font-size: 15px; font-weight: 600; color: var(--white); }
+  .footer-right { font-size: 12px; color: rgba(255,255,255,0.3); }
+
+  /* TEAM STRIP */
+  .team-strip {
+    background: var(--cream-dark);
+    border-radius: 12px; padding: 20px 24px;
+    margin: 32px 0;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .team-icon { font-size: 20px; }
+  .team-text { font-size: 13px; color: var(--text-mid); font-weight: 300; }
+  .team-text strong { color: var(--navy); font-weight: 600; }
+
+  /* ROLE TAG */
+  .role-tag {
+    display: inline-block;
+    background: var(--forest-pale); color: var(--forest);
+    font-size: 11px; font-weight: 600; padding: 4px 12px;
+    border-radius: 20px; margin-right: 8px; margin-bottom: 8px;
+    border: 1px solid rgba(45,90,61,0.2);
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <div class="nav-dot"></div>
+    DRIP Circle
+  </div>
+  <div class="nav-links">
+    <a href="javascript:void(0)" onclick="goToSection('research')">Research</a>
+    <a href="javascript:void(0)" onclick="goToSection('ideation')">Ideation</a>
+    <a href="javascript:void(0)" onclick="goToSection('design')">Design</a>
+    <a href="javascript:void(0)" onclick="goToSection('prototype')">Prototype</a>
+    <a href="javascript:void(0)" onclick="goToSection('reflection')">Reflection</a>
+  </div>
+  <div class="nav-badge">Group Project</div>
+</nav>
+
+<div class="cover">
+  <div class="cover-noise"></div>
+  <div class="cover-left">
+    <div class="cover-eyebrow">IS6147 — Service Design — Cork University Business School</div>
+    <h1 class="cover-title">DRIP<br><span>Circle</span></h1>
+    <p class="cover-subtitle">A circular fashion service designed to keep clothes in circulation — making sustainable behaviour rewarding, not obligatory, for fast fashion's most conflicted consumers.</p>
+    <div class="cover-meta">
+      <div class="cover-meta-item">
+        <div class="cml">Designers</div>
+        <div class="cmv">Group 2 — 5 members</div>
+      </div>
+      <div class="cover-meta-item">
+        <div class="cml">Type</div>
+        <div class="cmv">Service Design</div>
+      </div>
+      <div class="cover-meta-item">
+        <div class="cml">Platform</div>
+        <div class="cmv">Mobile App + In-store</div>
+      </div>
+      <div class="cover-meta-item">
+        <div class="cml">Year</div>
+        <div class="cmv">2026</div>
+      </div>
+    </div>
+  </div>
+  <div class="cover-right">
+    <div class="cover-circles">
+      <div class="cover-circle cc1"></div>
+      <div class="cover-circle cc2"></div>
+      <div class="cover-circle cc3"></div>
+    </div>
+    <div class="cover-icon">🌿</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- OVERVIEW -->
+  <div class="section">
+    <div class="section-tag">Overview</div>
+    <h2 class="section-title">The brief and the team</h2>
+    <p class="section-intro">Drip is a fictional global fast fashion retailer. The brief: design a new service that supports a sustainability pilot, keeps garments in circulation, and complements Drip's existing business rather than replacing it.</p>
+
+    <div class="team-strip">
+      <div class="team-icon">👥</div>
+      <div class="team-text"><strong>Team:</strong> Vanshika Juneja · René Scheuch · Tingting Shi · Clara Pei-yu Wang · Silvia Zverbikova &nbsp;|&nbsp; <strong>Module:</strong> IS6147 Design Thinking for Services &nbsp;|&nbsp; <strong>Programme:</strong> DDDB</div>
+    </div>
+
+    <div class="prose">
+      <p>Our proposed solution is <strong>DRIP Circle</strong> — a service that combines an in-store garment return and rewards system with a digital app for engagement, discovery, and social sharing. Customers return unwanted garments for points, browse a curated selection of pre-loved pieces, get styling inspiration, and track the environmental impact of their choices.</p>
+      <p>The service was designed with a clear principle at its core: <strong>sustainable behaviour must feel rewarding before it can feel virtuous</strong>. Every decision — from how condition tiers are named to how the campaign banner is placed — reflects this. We designed for real people operating in a system built against them, not for an idealised version of an eco-conscious consumer who doesn't exist.</p>
+    </div>
+
+    <div style="margin-top: 40px; background: var(--navy); border-radius: 16px; padding: 32px 36px;">
+      <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 20px;">
+        <div style="width: 5px; height: 36px; background: var(--forest-light); border-radius: 3px; flex-shrink: 0;"></div>
+        <div style="font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--white); letter-spacing: -0.5px;">My Role in this Project</div>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+        <span style="font-size: 13px; font-weight: 500; color: var(--white); background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.15);">Persona development</span>
+        <span style="font-size: 13px; font-weight: 500; color: var(--white); background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.15);">Empathy mapping</span>
+        <span style="font-size: 13px; font-weight: 500; color: var(--white); background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.15);">SCAMPER ideation</span>
+        <span style="font-size: 13px; font-weight: 500; color: var(--white); background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.15);">Wireflow design</span>
+        <span style="font-size: 13px; font-weight: 500; color: var(--white); background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.15);">App UI design</span>
+        <span style="font-size: 13px; font-weight: 500; color: var(--white); background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.15);">Secondary research</span>
+        <span style="font-size: 13px; font-weight: 500; color: var(--white); background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.15);">Journey mapping</span>
+        <span style="font-size: 13px; font-weight: 500; color: var(--white); background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.15);">HMW questions</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESEARCH -->
+  <div class="section" id="research">
+    <div class="section-tag">01 — Research</div>
+    <h2 class="section-title">Understanding why sustainable fashion fails</h2>
+    <p class="section-intro">Before generating any solutions, the team spent significant time understanding the real shape of the problem — through stakeholder mapping, 15 semi-structured interviews, secondary research, and a safari of fast fashion stores in Cork city.</p>
+
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-num">15</div>
+        <div class="stat-label">Semi-structured interviews with Irish university students</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">5</div>
+        <div class="stat-label">Consumer clusters identified from interview analysis</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">217</div>
+        <div class="stat-label">Academic papers reviewed in secondary research synthesis</div>
+      </div>
+    </div>
+
+    <div style="margin-top: 48px;">
+      <div class="section-tag" style="font-size: 10px;">Primary research</div>
+      <h3 style="font-family: 'Playfair Display', serif; font-size: 24px; color: var(--navy); margin-bottom: 16px; letter-spacing: -0.5px;">15 interviews. One consistent pattern.</h3>
+      <p class="section-intro" style="margin-bottom: 32px;">Interviews were conducted with students aged 19 to 23 across Cork, Dublin, Galway, Limerick and Wicklow. Four themes came through consistently across almost every conversation.</p>
+
+      <div class="insight-block">
+        <div class="insight-num">Finding 01</div>
+        <div class="insight-text"><strong>Distrust of sustainability claims.</strong> Almost every participant described being sceptical of the word "sustainable" being used by brands. This wasn't scepticism about sustainability as a concept — it was distrust directed specifically at brands, built up over years of vague claims with no way to verify them.</div>
+      </div>
+      <div class="insight-block">
+        <div class="insight-num">Finding 02</div>
+        <div class="insight-text"><strong>Price as a structural barrier.</strong> For budget-constrained participants, sustainable fashion simply wasn't a choice — it was unaffordable. For more financially comfortable participants, price still mattered because sustainable options didn't feel worth the premium when claims couldn't be verified.</div>
+      </div>
+      <div class="insight-block">
+        <div class="insight-num">Finding 03</div>
+        <div class="insight-text"><strong>The attitude-behaviour gap in action.</strong> Multiple participants were articulate about the problems with fast fashion and still bought fast fashion regularly. The guilt was real and present, but it didn't change behaviour. Adding more information or guilt-inducing messaging would not help.</div>
+      </div>
+      <div class="insight-block">
+        <div class="insight-num">Finding 04</div>
+        <div class="insight-text"><strong>Convenience is the real competitor.</strong> Fast fashion wins not just because it's cheap, but because it's easy — apps designed to maximise impulse buying, next-day delivery, endless new drops. Several participants described not having the time or energy to research ethical options even when they wanted to.</div>
+      </div>
+    </div>
+
+    <div style="margin-top: 48px;">
+      <div class="section-tag" style="font-size: 10px;">Secondary research</div>
+      <h3 style="font-family: 'Playfair Display', serif; font-size: 24px; color: var(--navy); margin-bottom: 16px; letter-spacing: -0.5px;">What the academic literature confirmed</h3>
+
+      <div class="prose">
+        <p>The team's secondary research centred on Schiaroli, Fraccascia and Dangelico (2024), a systematic review of 217 academic papers on sustainable consumer behaviour in fashion, published in the Journal of Cleaner Production. The study analysed drivers and barriers across three phases — buying, using, and disposing of clothes.</p>
+        <p>The key finding was that <strong>environmental concern plays a secondary role in purchase decisions</strong>. Price, style, comfort and quality matter far more to most consumers. The main barriers to sustainable fashion are high cost, distrust of brand claims, the perception that sustainable clothing looks unfashionable, limited availability, and deeply ingrained shopping habits.</p>
+        <p>The core takeaway that shaped the entire design direction: sustainable fashion fails when it leads with guilt or information, and succeeds when it is <strong>stylish, affordable, easy, and rewarding</strong>. This directly informed why DRIP Circle was built around rewards and convenience rather than moral obligation.</p>
+      </div>
+
+      <div class="quote-block">
+        <div class="quote-text">"The barriers to sustainable fashion are structural, not attitudinal. Consumers are not indifferent — they are operating in a system that makes unsustainable choices easier at every stage."</div>
+        <div class="quote-source">— Schiaroli, Fraccascia & Dangelico (2024), Journal of Cleaner Production</div>
+      </div>
+    </div>
+
+    <div style="margin-top: 48px;">
+      <div class="section-tag" style="font-size: 10px;">Safari findings</div>
+      <h3 style="font-family: 'Playfair Display', serif; font-size: 24px; color: var(--navy); margin-bottom: 16px; letter-spacing: -0.5px;">In-store observation</h3>
+      <div class="prose">
+        <p>The team visited H&M, Penneys, and Urban Outfitters in Cork. The most striking finding: <strong>none of the stores had a dedicated sustainable section</strong>. Sustainability was either invisible or passive — existing in small tags, optional QR codes, and background initiatives that required the customer to already be looking for it. Nothing was designed to meet a customer where they are and make sustainable choices feel like the obvious option.</p>
+        <p>Penneys was the most interesting — several garments had recycled material tags and there was a Primark Cotton Project with QR code posters. But the effort was passive. Urban Outfitters' mannequin styling — showing how to combine fewer pieces in different ways — was an unintentional sustainability insight: the industry already has tools for communicating versatility, it just isn't connecting them to sustainability.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PERSONAS -->
+  <div class="section">
+    <div class="section-tag">02 — Personas</div>
+    <h2 class="section-title">Four consumers. Four different barriers.</h2>
+    <p class="section-intro">Four personas were developed from the interview clusters. Each represents a different relationship with fast fashion and sustainability — and together they cover the full range of financial situations, values, and behaviours the service needed to account for.</p>
+
+    <div class="persona-grid">
+      <div class="persona-card">
+        <div class="persona-name">Aoife</div>
+        <div class="persona-type">The Functional Minimalist</div>
+        <div class="persona-problem">Trust Kills Intent</div>
+        <div class="persona-quote">"Everyone claims to be sustainable now because it sells. Doesn't mean much without evidence." She researches brands, reads labels, and compares options — and still often hits a dead end because sustainability claims are impossible to verify.</div>
+      </div>
+      <div class="persona-card">
+        <div class="persona-name">Ciarán</div>
+        <div class="persona-type">The Overburdened Sceptic</div>
+        <div class="persona-problem">Trust Kills Intent</div>
+        <div class="persona-quote">"We're not ignorant, we're conflicted. The system makes it really easy to do the wrong thing and really hard to do the right thing." He holds brands to a high standard but greenwashing makes him increasingly cynical.</div>
+      </div>
+      <div class="persona-card">
+        <div class="persona-name">Sharon</div>
+        <div class="persona-type">The Working Mother</div>
+        <div class="persona-problem">Budget Kills Intent</div>
+        <div class="persona-quote">"The sustainable fashion movement needs to centre accessibility and affordability, or it's just another form of classism dressed up as ethics." For Sharon, the cheapest option isn't a preference — it's the only one available.</div>
+      </div>
+      <div class="persona-card">
+        <div class="persona-name">Carlin</div>
+        <div class="persona-type">The Trend-Trapped Creative</div>
+        <div class="persona-problem">Style Kills Intent</div>
+        <div class="persona-quote">"The guilt is real but so is the want." Fashion is identity for Carlin — she needs sustainable options to meet her where she is aesthetically, not judge her from a moral high ground she can't afford to reach.</div>
+      </div>
+    </div>
+
+    <div class="quote-block" style="margin-top: 32px;">
+      <div class="quote-text">The four personas kept the team honest throughout the ideation process. Any concept that only worked for eco-conscious consumers who already had options failed the Sharon test. Any concept that wasn't visually exciting failed the Carlin test.</div>
+    </div>
+  </div>
+
+  <!-- IDEATION -->
+  <div class="section" id="ideation">
+    <div class="section-tag">03 — Ideation</div>
+    <h2 class="section-title">From research to direction</h2>
+    <p class="section-intro">The team used How Might We framing, SCAMPER, and concept clustering to move from problem understanding to solution generation. Ideas were generated on Miro before being cleaned, grouped, and voted on.</p>
+
+    <div style="margin-bottom: 48px;">
+      <div class="section-tag" style="font-size: 10px;">SCAMPER method</div>
+      <h3 style="font-family: 'Playfair Display', serif; font-size: 24px; color: var(--navy); margin-bottom: 24px; letter-spacing: -0.5px;">Seven angles. One consistent direction.</h3>
+
+      <div class="scamper-row">
+        <div class="scamper-letter">S</div>
+        <div class="scamper-content">
+          <div class="scamper-word">Substitute</div>
+          <div class="scamper-idea">Replace guilt-driven sustainability messaging with credit points earned on every return. Substitute cheap disposable garments with durable quality materials. Replace fast fashion messaging with slow fashion values and styling skills.</div>
+        </div>
+      </div>
+      <div class="scamper-row">
+        <div class="scamper-letter">C</div>
+        <div class="scamper-content">
+          <div class="scamper-word">Combine</div>
+          <div class="scamper-idea">Combine the online shopping checkout with a built-in garment return scheme. Combine loyalty rewards with sustainable actions like returning or repairing. Host free repair workshops in Drip stores that merge skill-building, social experience and garment extension into one touchpoint.</div>
+        </div>
+      </div>
+      <div class="scamper-row">
+        <div class="scamper-letter">A</div>
+        <div class="scamper-content">
+          <div class="scamper-word">Adapt</div>
+          <div class="scamper-idea">Adapt the airline loyalty model — reward customers with CO₂ savings they can spend in-store. Adapt the Netflix subscription model — pay monthly to access a rotating Drip wardrobe. Adapt the bottle deposit model — add a refundable deposit redeemed only on return.</div>
+        </div>
+      </div>
+      <div class="scamper-row">
+        <div class="scamper-letter">M</div>
+        <div class="scamper-content">
+          <div class="scamper-word">Modify</div>
+          <div class="scamper-idea">Modify language from guilt to motivation — frame sustainable behaviour as something that earns rather than costs. Modify the social aspect of secondhand, making resale a hype-driven shareable moment like a new drop. Slow down the promotion cycle to reduce impulse buying.</div>
+        </div>
+      </div>
+      <div class="scamper-row">
+        <div class="scamper-letter">P</div>
+        <div class="scamper-content">
+          <div class="scamper-word">Put to other use</div>
+          <div class="scamper-idea">Use underused Drip stores to host repair and upcycling workshops. Use consumer data not to sell more but to manufacture less. Use returned damaged garments as raw repair material for in-store repair services.</div>
+        </div>
+      </div>
+      <div class="scamper-row">
+        <div class="scamper-letter">E</div>
+        <div class="scamper-content">
+          <div class="scamper-word">Eliminate</div>
+          <div class="scamper-idea">Eliminate guilt-driven sustainability language entirely from all Drip communications — the highest-voted idea across the Miro board. Eliminate complicated environmental information that overwhelms rather than motivates. Eliminate the research burden by making transparency automatic rather than effortful.</div>
+        </div>
+      </div>
+      <div class="scamper-row">
+        <div class="scamper-letter">R</div>
+        <div class="scamper-content">
+          <div class="scamper-word">Reverse</div>
+          <div class="scamper-idea">Reverse ownership — shift from selling clothes to renting them. Reverse garment design — build end-of-life into the product from day one using modular components and mono-materials. Reverse the traditional make-sell-dispose chain to collect-remake-resell.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 48px;">
+      <div class="section-tag" style="font-size: 10px;">The chosen direction</div>
+      <h3 style="font-family: 'Playfair Display', serif; font-size: 24px; color: var(--navy); margin-bottom: 16px; letter-spacing: -0.5px;">Three top solutions</h3>
+
+      <div class="three-col">
+        <div class="card">
+          <div class="card-label">Solution 01</div>
+          <div class="card-title">Replace guilt with rewards</div>
+          <div class="card-text">Make returning a Drip garment as rewarding as buying something new. Points earned upfront, before the user commits — so the value is clear from the start.</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Solution 02</div>
+          <div class="card-title">Embed circularity in the platform</div>
+          <div class="card-text">Make Drip's circular service as frictionless as adding something to a Shein cart. Return, browse secondhand, and track impact — all within one existing platform.</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Solution 03</div>
+          <div class="card-title">Repurpose stores as hubs</div>
+          <div class="card-text">Transform Drip's physical stores from sales spaces into circular fashion community hubs — where repair, upcycling and styling become social experiences people want to attend.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="problem-block" style="margin-top: 40px;">
+      <div class="pb-label">Problem statement</div>
+      <div class="pb-text">"Consumers who want to engage in more sustainable and creative approaches to fashion are unable to do so consistently due to the demands of everyday life, financial constraints, and the constant pressure of social media trend cycles that make fast fashion the path of least resistance."</div>
+    </div>
+  </div>
+
+  <!-- DESIGN -->
+  <div class="section" id="design">
+    <div class="section-tag">04 — Design</div>
+    <h2 class="section-title">Building DRIP Circle</h2>
+    <p class="section-intro">The app was designed across 11 screens and 4 user flows. Every design decision was traced directly back to the research and the personas — nothing was added for visual interest without a justified reason.</p>
+
+    <div style="margin-bottom: 48px;">
+      <div class="section-tag" style="font-size: 10px;">App screens</div>
+      <h3 style="font-family: 'Playfair Display', serif; font-size: 24px; color: var(--navy); margin-bottom: 24px; letter-spacing: -0.5px;">11 screens. 4 flows.</h3>
+
+      <div class="screens-grid">
+        <div class="screen-item">
+          <div class="screen-icon">🔑</div>
+          <div class="screen-name">Sign Up</div>
+          <div class="screen-desc">Register or log in to DRIP Circle</div>
+        </div>
+        <div class="screen-item">
+          <div class="screen-icon">🌿</div>
+          <div class="screen-name">Welcome</div>
+          <div class="screen-desc">Intent picker — personalised onboarding</div>
+        </div>
+        <div class="screen-item">
+          <div class="screen-icon">🏠</div>
+          <div class="screen-name">Home</div>
+          <div class="screen-desc">Dashboard hub with points and features</div>
+        </div>
+        <div class="screen-item">
+          <div class="screen-icon">🔄</div>
+          <div class="screen-name">Re-DRIP</div>
+          <div class="screen-desc">Scan tag or pick garment type + condition</div>
+        </div>
+        <div class="screen-item">
+          <div class="screen-icon">📍</div>
+          <div class="screen-name">Choose Method</div>
+          <div class="screen-desc">Select return method — store drop-off</div>
+        </div>
+        <div class="screen-item">
+          <div class="screen-icon">✅</div>
+          <div class="screen-name">Success</div>
+          <div class="screen-desc">Confirmation with points and CO₂ saved</div>
+        </div>
+        <div class="screen-item">
+          <div class="screen-icon">🛍️</div>
+          <div class="screen-name">Shop</div>
+          <div class="screen-desc">Shop New and Shop Re-Second Hand</div>
+        </div>
+        <div class="screen-item">
+          <div class="screen-icon">👤</div>
+          <div class="screen-name">Me / Profile</div>
+          <div class="screen-desc">Personal stats, level progress, rewards</div>
+        </div>
+        <div class="screen-item">
+          <div class="screen-icon">🔍</div>
+          <div class="screen-name">Garment Transparency</div>
+          <div class="screen-desc">Material origin, repairability score, journey</div>
+        </div>
+        <div class="screen-item">
+          <div class="screen-icon">✨</div>
+          <div class="screen-name">Style Inspiration</div>
+          <div class="screen-desc">How to wear, matched outfits, community</div>
+        </div>
+        <div class="screen-item">
+          <div class="screen-icon">🗺️</div>
+          <div class="screen-name">Discovery Map</div>
+          <div class="screen-desc">Nearby stores, trending items, just returned</div>
+        </div>
+        <div class="screen-item" style="background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.1);">
+          <div class="screen-icon" style="opacity:0.3">+</div>
+          <div class="screen-name" style="opacity:0.3">4 User Flows</div>
+          <div class="screen-desc" style="opacity:0.3">Onboarding · Return · Shop · Explore</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 48px;">
+      <div class="section-tag" style="font-size: 10px;">User flows</div>
+      <h3 style="font-family: 'Playfair Display', serif; font-size: 24px; color: var(--navy); margin-bottom: 16px; letter-spacing: -0.5px;">How users move through the service</h3>
+
+      <table class="flow-table">
+        <thead>
+          <tr>
+            <th>Flow</th>
+            <th>Screens</th>
+            <th>User journey</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Onboarding</td>
+            <td>Sign Up → Welcome / Intent Picker</td>
+            <td>User registers and selects their intent, personalising the home screen from the first interaction. The intent picker directly responds to the different motivations across our four personas.</td>
+          </tr>
+          <tr>
+            <td>Return Process</td>
+            <td>Home → Re-DRIP Step 1 → Choose Method → Success</td>
+            <td>Core service flow. Linear three-step return ending on a celebratory success screen with points and CO₂ confirmed. Points are shown upfront before the user commits.</td>
+          </tr>
+          <tr>
+            <td>Shopping</td>
+            <td>Home → Shop (New / Re-Second Hand)</td>
+            <td>User browses pre-loved or new items. Shop is reached from home screen via bottom nav — not pushed automatically after a return, reflecting user control.</td>
+          </tr>
+          <tr>
+            <td>Explore Features</td>
+            <td>Home → Garment Transparency / Style Inspiration / Discovery Map</td>
+            <td>Three experience features accessed via quick-access cards on home. Garment Transparency directly addresses Ciarán's trust problem. Style Inspiration speaks to Carlin. Discovery Map includes the UCC Student Centre community drop point.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="margin-top: 48px;">
+      <div class="section-tag" style="font-size: 10px;">Key design decisions</div>
+      <h3 style="font-family: 'Playfair Display', serif; font-size: 24px; color: var(--navy); margin-bottom: 24px; letter-spacing: -0.5px;">Every decision justified by research</h3>
+
+      <div class="decision-item">
+        <div class="decision-num">1</div>
+        <div>
+          <div class="decision-title">Navy blue as primary action colour — not green</div>
+          <div class="decision-text">Despite DRIP Circle being a sustainability-focused service, navy blue was chosen as the primary action colour. The research found that participants consistently associated green with greenwashing and described sustainability branding as performative. Navy signals trustworthiness and premium quality without triggering the scepticism that green-heavy branding provokes. Green was retained but used sparingly — on certification badges, the Pre-loved tag, and the Scan Tag screen — so that when it appears, it carries specific meaning rather than functioning as decoration.</div>
+        </div>
+      </div>
+      <div class="decision-item">
+        <div class="decision-num">2</div>
+        <div>
+          <div class="decision-title">Re-DRIP tab name — not Return or Recycle</div>
+          <div class="decision-text">The return tab was named Re-DRIP because "recycle" tested poorly in interviews, feeling obligatory and guilt-driven. Naming it within the DRIP brand language keeps the action feeling like part of the lifestyle rather than a separate environmental duty. This reflects the broader insight that moral messaging backfires with this audience, and that sustainable behaviour is more likely when it feels natural and rewarding rather than dutiful.</div>
+        </div>
+      </div>
+      <div class="decision-item">
+        <div class="decision-num">3</div>
+        <div>
+          <div class="decision-title">Points shown upfront before commitment</div>
+          <div class="decision-text">Points are placed at the very top of the home screen and shown upfront on the condition check screen because the research identified reward as the primary driver of behaviour change. If the incentive is buried or revealed only after the user commits to the return, the motivation to act is weakened. Showing the value immediately before the user has to do anything removes the uncertainty that causes drop-off.</div>
+        </div>
+      </div>
+      <div class="decision-item">
+        <div class="decision-num">4</div>
+        <div>
+          <div class="decision-title">Campaign as inline card, not popup</div>
+          <div class="decision-text">The marketing campaign is embedded as an inline card on the home screen rather than a popup because participants described intrusive promotional messaging as a reason they disengage from brand apps. An inline card respects the user's attention while still surfacing promotional content, maintaining commercial functionality without creating friction. The user can engage with it or scroll past — it never interrupts.</div>
+        </div>
+      </div>
+      <div class="decision-item">
+        <div class="decision-num">5</div>
+        <div>
+          <div class="decision-title">Condition tiers: Like New, Good, Well-loved</div>
+          <div class="decision-text">The three condition tiers use human, non-judgmental language rather than technical grades. "Well-loved" in particular reframes wear as character rather than damage, reducing the perceived barrier to returning items that aren't in perfect condition. If users feel their returned items will be unfairly assessed or dismissed, they won't engage with the return flow at all — a direct lesson from the Sharon persona.</div>
+        </div>
+      </div>
+      <div class="decision-item">
+        <div class="decision-num">6</div>
+        <div>
+          <div class="decision-title">Secondhand as a separate "Shop Re-Second Hand" tab</div>
+          <div class="decision-text">The marketplace was split into Shop New and Shop Re-Second Hand because conflating new and secondhand stock risks making pre-loved items feel like a lesser option. Giving secondhand its own dedicated space frames circular stock as a distinct and desirable category rather than a discounted fallback — directly addressing the persona of the budget-constrained consumer who is already engaging in sustainable behaviour but doesn't see it reflected in the products available.</div>
+        </div>
+      </div>
+      <div class="decision-item">
+        <div class="decision-num">7</div>
+        <div>
+          <div class="decision-title">Near You includes UCC Student Centre drop point</div>
+          <div class="decision-text">The Discovery Map feature includes a Community Drop Point at UCC Student Centre because the research was conducted entirely with Irish university students, and physical accessibility was identified as a practical barrier. A campus drop point removes the need for a dedicated trip to a high street store, reducing the effort cost of returning items for the most price-sensitive segment of the user base.</div>
+        </div>
+      </div>
+      <div class="decision-item">
+        <div class="decision-num">8</div>
+        <div>
+          <div class="decision-title">Choose Return Method screen retained as a dismissed idea</div>
+          <div class="decision-text">The screen presenting Free Mail Return, Drop at Drip Store, and Request Pickup was considered for removal during team review. The team decided to retain it in the prototype but document it as a dismissed idea — while it is a strong design concept, offering free mail return and doorstep pickup is not financially feasible in the Irish market at this time. For the current pilot scope, in-store drop-off is the primary return method.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROTOTYPE -->
+  <div class="section" id="prototype">
+    <div class="section-tag">05 — Prototype</div>
+    <h2 class="section-title">The interactive prototype</h2>
+    <p class="section-intro">The final prototype was built in Figma across all 11 screens and 4 flows, with full interactivity across the onboarding, return, shop, and explore journeys.</p>
+
+    <div class="proto-section">
+      <div class="proto-eyebrow">Live Figma Prototype</div>
+      <div class="proto-title">DRIP Circle — Interactive Prototype</div>
+      <div class="proto-desc">Explore all 11 screens and 4 user flows — from onboarding and garment return to secondhand shopping and the Garment Transparency feature.</div>
+      <a href="https://snuff-shred-25740851.figma.site" target="_blank" class="proto-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        View Prototype
+      </a>
+    </div>
+
+    <div style="margin-top: 40px;">
+      <div class="section-tag" style="font-size: 10px;">Wireflows</div>
+      <h3 style="font-family: 'Playfair Display', serif; font-size: 24px; color: var(--navy); margin-bottom: 16px; letter-spacing: -0.5px;">Navigation logic</h3>
+      <div class="prose">
+        <p>The wireflow maps how users navigate between the 11 screens, combining screen structure with directional flow logic. It distinguishes between primary navigation — always accessible via the bottom tab bar — and secondary navigation within individual flows such as the three-step return process.</p>
+        <p>The shop screen connects directly from the home screen via the bottom navigation tab rather than from the return success screen. This was deliberate — after completing a return the user lands back on the home screen with their updated points balance, and any decision to browse the shop comes from their own intent rather than being automatically pushed. Users should feel in control rather than directed.</p>
+        <p>The marketing campaign banner does not appear as a separate screen in the wireflow. It is embedded as an inline card on the home screen, always present without requiring its own navigation path. The user can tap it to reach the relevant shop section, or scroll past it without any disruption.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- REFLECTION -->
+  <div class="section" id="reflection">
+    <div class="section-tag">06 — Reflection</div>
+    <h2 class="section-title">What we dismissed and what we learned</h2>
+    <p class="section-intro">Not every idea that emerged from ideation made it into the final service. Documenting what was considered and why it was set aside is as important as documenting what was kept.</p>
+
+    <div class="reflection-item">
+      <div class="ri-label">Dismissed — C2C Marketplace (Consumer to Consumer)</div>
+      <div class="ri-text">A consumer-to-consumer marketplace function, rental, and swap features were considered and discarded. After evaluating buyer-paid fees, seller service realities, and shipping partnerships, the team prioritised DRIP's own curated secondhand selection rather than complicating the app's functionality. A C2C model would have added significant operational complexity for a pilot service and risked diluting the core return-and-reward proposition.</div>
+    </div>
+    <div class="reflection-item">
+      <div class="ri-label">Dismissed — Self-service kiosks for returning</div>
+      <div class="ri-text">The team originally considered self-service kiosks at return points. After looking closely at the staff inspection procedure, it became clear that garment conditions are too varied to be assessed reliably by machines. Manual classification was necessary to ensure fair and transparent rewards. The QR code scanning feature from the original kiosk concept was retained — customers can scan a garment tag in-app and generate a QR code before visiting the store to accelerate the intake process.</div>
+    </div>
+    <div class="reflection-item">
+      <div class="ri-label">Deferred — Garment traceability after return</div>
+      <div class="ri-text">Showing customers the exact journey of their returned garment — where it went, who bought it — was initially included as a concept. While it would give users a strong sense of involvement, the practicality of garment-level tracing was identified as out of scope for the pilot. It was moved to Future Extensions and could be implemented in a later phase, potentially using EU Digital Product Passport technology.</div>
+    </div>
+    <div class="reflection-item">
+      <div class="ri-label">Deferred — Workshops and designer collaborations</div>
+      <div class="ri-text">Workshops for repair and upcycling, and collaborations with local designers for the "Reborn Selection" were both strong concepts but treated as future extensions rather than pilot requirements. The focused MVP — return clothes, get fair rewards, best items resold in a curated section — needed to work before adding the complexity of physical programming and external partnerships.</div>
+    </div>
+
+    <div style="margin-top: 48px;">
+      <div class="section-tag" style="font-size: 10px;">Potential risks</div>
+      <h3 style="font-family: 'Playfair Display', serif; font-size: 24px; color: var(--navy); margin-bottom: 24px; letter-spacing: -0.5px;">What could go wrong</h3>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-label">Risk</div>
+          <div class="card-title">In-store storage overload</div>
+          <div class="card-text">If garment returns exceed processing capacity, the system breaks down. The service needs to dynamically adjust incentives based on capacity while simultaneously increasing garment outflow through resale, refurbishment, and recycling channels.</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Risk</div>
+          <div class="card-title">Inconsistent grading</div>
+          <div class="card-text">If garment assessment is inconsistent, trust in the reward system collapses. Standardised grading criteria, staff training, and visible guidelines are all needed to ensure the same garment receives the same reward regardless of which counter or staff member handles it.</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Risk</div>
+          <div class="card-title">Long counter wait times</div>
+          <div class="card-text">Poor in-store experience at the return counter would immediately undermine the service's promise of convenience. Staff allocation aligned to store traffic patterns, and encouragement of QR pre-processing via the app, would reduce in-store handling time significantly.</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Risk</div>
+          <div class="card-title">Point value confusion</div>
+          <div class="card-text">Abstract points systems fail when users can't translate them into real value. The solution is real-world equivalents shown clearly — "100 points = €1" — throughout the app, so the reward always feels tangible and worth the return effort.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="quote-block" style="margin-top: 40px;">
+      <div class="quote-text">Drip's customers are not ignorant. They are conflicted. A service that removes barriers will always outperform one that adds guilt.</div>
+      <div class="quote-source">— The principle that guided every design decision in this project</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <div class="footer-left">DRIP Circle — IS6147 Service Design · Group 2</div>
+  <div class="footer-right">Vanshika Juneja · René Scheuch · Tingting Shi · Clara Wang · Silvia Zverbikova · 2026</div>
+</div>
+
+<script>
+  function goToSection(id) {
+    var el = document.getElementById(id);
+    if (el) {
+      var top = el.getBoundingClientRect().top + window.pageYOffset - 56;
+      window.scrollTo({ top: top, behavior: 'smooth' });
+    }
+  }
+</script>
+</body>
+</html>
